@@ -1,0 +1,116 @@
+--set1
+
+/*1.DDL operations: Create a copy of the "employees" table named 
+"employees_backup" without including the data.*/
+
+create table employees_backup (
+    employee_id    number(6),
+    first_name     varchar2(20),
+    last_name      varchar2(25)
+        constraint empp_lastt_name_nn not null,
+    email          varchar2(25)
+        constraint empp_emaill_nn not null ,
+    phone_number   varchar2(20),
+    hire_date      date
+        constraint empp_hiree_date_nn  not null ,
+    job_id         varchar2(10)
+        constraint empp_jobb_nn not null,
+    salary         number(8, 2),
+    commission_pct number(2, 2),
+    manager_id     number(6),
+    department_id  number(4),
+    constraint  empp_salaryy_min check ( salary > 0 ),
+    constraint empp_emaill_uk unique ( email )
+);
+
+
+/*2.Update the salary of all employees in the"employees_backup" table
+by adding a 15% raise for those who were hired in the year 2000.
+*/
+
+update employees_backup  set salary= salary*1.15 where  to_char(hire_date,'yyyy')='2000';
+
+/*3.List all employees in the "employees" table who were hired on a Friday.*/
+
+select*from employees where to_char(hire_date,'D')='5';
+
+/*4.Aggregate Functions: Calculate the total salary paid per job
+in the "employees" table.*/
+
+select j.job_title, sum(e.salary)as total_salary
+from employees e join jobs j on
+e.job_id=j.job_id
+group by j.job_title;
+
+/*5. Using a LEFT JOIN, list all departments from the "departments" table and
+the count of employees in each department from the "employees" table.*/
+
+select d.department_name,count(e.employee_id) as employee_count
+from departments d left join employees e on
+d.department_id=e.department_id
+group by d.department_name;
+
+
+--set2
+
+/*1.Show the job_id in the "jobs" table in all uppercase.*/
+
+select upper(job_id) from jobs;
+
+/*2. Find all employees in the "employees" table whose
+salary is above the average salary of their respective departments.*/
+
+select e.*
+from employees e where e.salary>(
+select avg(e1.salary) from employees e1
+where e.department_id=e1.department_id);
+
+/*3.Use the UNION operator to create a list of all unique job_ids 
+from both the "employees" and "job_history" tables.*/
+
+select job_id from employees
+union
+select job_id from job_history;
+
+/*4.Delete all records from the "employees_backup" table 
+where the salary is below 3000.*/
+
+delete from employees_backup where salary <3000;
+
+/*5.Add a new column to the "employees_backup" table called "performance_score" 
+of type INTEGER.*/
+
+alter table employees_backup add  performance_score Integer;
+
+
+--set3
+
+/*1.Select the last_name, job_id, and department_id 
+from the "employees" table where the last_name like 'S%'.*/
+
+select last_name,job_id ,department_id from employees where last_name like 'S%';
+
+/*2.Use the RANK() function to display employees' salary 
+ranking within their department.*/--bu funksiyani yeni oyrendim
+
+---
+
+/*3Find the highest, lowest, and average number of employees
+in each job from the "employees" table..*/
+----
+
+/* 4.Write a query that FULL OUTER JOINs the "employees" table with the
+"departments" table and displays the employee's first name, last name, 
+and department name.*/
+
+select e.first_name,e.last_name,d.department_name
+from employees e full outer join departments d on
+e.department_id=d.department_id;
+
+/*5.Write a query that selects all employees in the "employees" table 
+who work in a department with more than 80 employees.*/
+
+select *from employees
+where department_id in(
+select department_id from employees 
+where department_id>80);
